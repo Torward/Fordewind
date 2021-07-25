@@ -1,5 +1,4 @@
 import Model.UploadFileMsg;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -18,7 +17,6 @@ import javafx.stage.Stage;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +33,10 @@ public class CSfirstScreen  implements Initializable {
     private Desktop desktop = Desktop.getDesktop();
     private TilePane tilepane = new TilePane();
     private NettyNetwork network;
-    private UploadFileMsg uploadFileMsg;
+    private UploadFileMsg uploadFileMsg = new UploadFileMsg();
     private ClientUploadFileHandler clientUploadFileHandler;
+    private String root = "client/clientFiles";
+    private String sroot = "server/serverFiles";
 
 
     @Override
@@ -44,9 +44,27 @@ public class CSfirstScreen  implements Initializable {
         tilepane.setPrefTileWidth(70);
         tilepane.setPrefTileHeight(70);
         tilepane.setTileAlignment(Pos.CENTER);
+//        File currentDir = new File("server/serverFiles");
+//        WatchService watchService = null;
+//        while (true) {
+//
+//        try {
+//            watchService = FileSystems.getDefault().newWatchService();
+//            Path path = Paths.get("server/serverFiles");
+////            displayFileAndDir(currentDir);
+//            WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE,StandardWatchEventKinds.ENTRY_MODIFY);
+//            //System.out.format("%s: ", watchKey);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+  //  }
+
+
+
 
 
     }
+
 
     public void download(ActionEvent actionEvent) {
     }
@@ -59,7 +77,7 @@ public class CSfirstScreen  implements Initializable {
         FileChooser fileChooser = new FileChooser();
         Stage secondaryStage = new Stage();
         fileChooser.setTitle("Выберете файл для отправки");
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 
         File file = fileChooser.showOpenDialog(secondaryStage);
 
@@ -69,11 +87,51 @@ public class CSfirstScreen  implements Initializable {
             printLog(log_area, files);
         }
     }
+    public void fileChooseM(MouseEvent mouseEvent) {
+        FileChooser fileChooser = new FileChooser();
+        Stage secondaryStage = new Stage();
+        fileChooser.setTitle("Выберете файл для отправки");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 
+        File file = fileChooser.showOpenDialog(secondaryStage);
+
+        if (file != null) {
+            sendFile(file);
+            List<File> files = Collections.singletonList(file);
+            printLog(log_area, files);
+        }
+    }
+// private void displayFileAndDir(File dir){
+//        try{
+//            ImageView [] a = null;
+//            Node img = new Node(new ImageView(new Image(ClassLoader.getSystemResourceAsStream("img/folder.png"),64.0, 64.0, true, true)));
+//          File [] list = dir. listFiles();
+//          int n = list.length;
+//            int pos =0;
+//          a = new ImageView[pos];
+//            for (int i = 0; i < list.length ; i++) {
+//                if(list[i].isDirectory() ){
+//                    tilepane.getChildren().clear();
+//                   a[pos] =  new TilePane().getChildren().add( img);
+//                }else{
+//                    long lastModified = file.lastModified();
+//                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+//                    tilepane.getChildren().add(Integer.parseInt(file.getName()),new ImageView(String.valueOf(file.getCanonicalFile())));
+//                }
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+// }
 
     private void sendFile(File file) {
         try {
-            uploadFileMsg.getFile();
+            String fileMd5 = file.getName();
+            uploadFileMsg.setFilePath(sroot);
+            uploadFileMsg.setFile(file);
+            uploadFileMsg.setFile_md5(fileMd5);
+            uploadFileMsg.setStart(0);
+
             network = new NettyNetwork(uploadFileMsg);
             //this.desktop.open(file); //Здесь код отправки на серевер или поменяю на send
         } catch (Exception e) {

@@ -16,29 +16,25 @@ public class ClientUploadFileHandler extends ChannelInboundHandlerAdapter {
     public RandomAccessFile randomAccessFile;
     private UploadFileMsg uploadFileMsg;
     public TextArea log_area;
+    private String path = "server/serverFiles";
 
-    public ClientUploadFileHandler(UploadFileMsg fu) {
-        if (fu.getFile().exists()) {
-            if (!fu.getFile().isFile()) {
-                log_area.appendText("Это не файл: " + fu.getFile());
-                return;
-            }
-        }
-        this.uploadFileMsg = fu;
+
+    public ClientUploadFileHandler(UploadFileMsg uploadFileMsg) throws Exception {
+
+//        if (uploadFileMsg.getFile().exists()) {
+//            if (!uploadFileMsg.getFile().isFile()) {
+//                log_area.appendText("Это не файл: " + uploadFileMsg.getFile());
+//                return;
+//            }
+//        }
+        this.uploadFileMsg = uploadFileMsg;
+
     }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
-        log_area.appendText("Передача окончена!");
-        log.debug("Клиент закончил передачу!");
-    }
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         log.debug("Метод channelActive() выполняется...");
         try {
-            randomAccessFile = new RandomAccessFile(uploadFileMsg.getFile(), "r");
+            randomAccessFile = new RandomAccessFile(uploadFileMsg.getFile(), "rw");
             randomAccessFile.seek(uploadFileMsg.getStart());
             lastLength = 1024 * 8;
             byte[] bytes = new byte[lastLength];
@@ -59,10 +55,11 @@ public class ClientUploadFileHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
         if (msg instanceof Integer) {
             start = (Integer) msg;
             if (start != -1) {
-                randomAccessFile = new RandomAccessFile(uploadFileMsg.getFile(), "r");
+                randomAccessFile = new RandomAccessFile(uploadFileMsg.getFile(), "rw");
                 randomAccessFile.seek(start);
                 int a = (int) (randomAccessFile.length() - start);
                 int b = (int) (randomAccessFile.length() / 1024 * 2);
@@ -88,4 +85,11 @@ public class ClientUploadFileHandler extends ChannelInboundHandlerAdapter {
 
         }
     }
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        //log_area.appendText("Передача окончена!");
+        log.debug("Клиент закончил передачу!");
+    }
+
 }

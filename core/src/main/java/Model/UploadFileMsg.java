@@ -10,6 +10,15 @@ private int start;
 private int end;
 private byte[] bytes;
 private String file_md5;
+private String filePath;
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     public static long getSerialId() {
         return SERIAL_ID;
